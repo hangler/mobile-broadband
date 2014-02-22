@@ -48,30 +48,27 @@
 
       var mergedData;
 
-      var allAveragePrices = [];
+      var allPrices = [];
 
       for (item in mergedData) {
-        var avg = mergedData[item]["average"];
-        if (!isNaN(avg)) {
-          allAveragePrices.push(avg);  
+        var minPrice = mergedData[item]["minPrice"];
+        if (!isNaN(minPrice) && minPrice > 0) {
+          allPrices.push(minPrice);  
         }
       }
 
-      //console.log(allAveragePrices);
+      allPrices.sort(sortNumber);
 
-      allAveragePrices.sort(sortNumber);
-      //console.log(allAveragePrices);
-
-      var numPrices = allAveragePrices.length;
-      var minPrice = allAveragePrices[0];
-      var maxPrice = allAveragePrices[numPrices - 1];
+      var numPrices = allPrices.length;
+      var minPrice = allPrices[0];
+      var maxPrice = allPrices[numPrices - 1];
       var numBins = 5;
 
       var binSize = (numPrices) / numBins;
 
       for (item in mergedData) {
-        var avg = mergedData[item]["average"];
-        var avgAtIndex = allAveragePrices.indexOf(avg);
+        var avg = mergedData[item]["minPrice"];
+        var avgAtIndex = allPrices.indexOf(avg);
         if (avgAtIndex > -1) {
           var binNumber = parseInt(avgAtIndex / binSize);
           mergedData[item]["fillKey"] = binNumber;
@@ -83,7 +80,7 @@
         var lastIndex = parseInt((i + 1) * binSize - 1);
         console.log(firstIndex);
         console.log(lastIndex);
-        legendLabels[i] = formatCurrency(allAveragePrices[firstIndex]) + " &ndash; " + formatCurrency(allAveragePrices[lastIndex]);
+        legendLabels[i] = formatCurrency(allPrices[firstIndex]) + " &ndash; " + formatCurrency(allPrices[lastIndex]);
       }
 
       console.log(legendLabels);
@@ -106,17 +103,16 @@
 
       for (var countryCode in countryGroups) {
         var mobilePackages = countryGroups[countryCode];
-        var sum = 0.0;
-        var denominator = 0;
+        var minPrice = 0.0;
         for (var i = 0; i < mobilePackages.length; i++) {
           adjustedPackageCost = mobilePackages[i][2];
-          sum += adjustedPackageCost;
           if (adjustedPackageCost != null) {
-            denominator++;
+            if (minPrice == 0.0 || adjustedPackageCost < minPrice) {
+              minPrice = adjustedPackageCost;
+            }
           }
         }
-        var avg = sum / denominator;
-        mergedData[countryCode] = { "average": avg }
+        mergedData[countryCode] = { "minPrice": minPrice }
 
       }
 
@@ -127,9 +123,9 @@
 
     function createPopup(geo, data) {
       var popup = '<div class="hoverinfo"><strong>';
-      popup += 'Avg $/GB (USD PPP) in ' + geo.properties.name + ': ';
+      popup += 'Min $/GB (USD PPP) in ' + geo.properties.name + ': ';
       
-      if (data != null && data.average != null) {
+      if (data != null && data.minPrice != 0.00) {
         popup += formatPrice(data);
       } else {
         popup += 'N/A';
@@ -140,10 +136,10 @@
     }
 
     function formatPrice(data) {
-      if (isNaN(data.average)) {
+      if (isNaN(data.minPrice)) {
         return "N/A";
       }
-      return formatCurrency(data.average);
+      return formatCurrency(data.minPrice);
     }
 
     function formatCurrency(number) {
