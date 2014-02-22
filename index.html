@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bootstrap 101 Template</title>
+
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/d3.min.js"></script>
+  <script src="js/topojson.js"></script>
+  <script src="js/datamaps.world.min.js"></script>
+  <script src="js/underscore.min.js"></script>
+
+
+  <script>
+
+    myFills = {
+      "0":  "#c7e9b4",
+      "1":  "#7fcbbb",
+      "2":  "#41b6c4",
+      "3":  "#2c7fb8",
+      "4":  "#253494",
+      MISS: "#ccc",
+      defaultFill: '#ccc'
+    };
+
+    legendLabels = [];
+
+    function getCostPerGB(costPerGB) {
+      parsedCost = parseFloat(costPerGB.replace(',', ''));
+      if (isNaN(parsedCost)) return null;
+      return parsedCost;
+    }
+
+    function sortNumber(a, b) {
+        return a - b;
+    }
+
+    function assignBin(mergedData) {
+
+      var mergedData;
+
+      var allAveragePrices = [];
+
+      for (item in mergedData) {
+        var avg = mergedData[item]["average"];
+        if (!isNaN(avg)) {
+          allAveragePrices.push(avg);  
+        }
+      }
+
+      //console.log(allAveragePrices);
+
+      allAveragePrices.sort(sortNumber);
+      //console.log(allAveragePrices);
+
+      var numPrices = allAveragePrices.length;
+      var minPrice = allAveragePrices[0];
+      var maxPrice = allAveragePrices[numPrices - 1];
+      var numBins = 5;
+
+      var binSize = (numPrices) / numBins;
+
+      for (item in mergedData) {
+        var avg = mergedData[item]["average"];
+        var avgAtIndex = allAveragePrices.indexOf(avg);
+        if (avgAtIndex > -1) {
+          var binNumber = parseInt(avgAtIndex / binSize);
+          mergedData[item]["fillKey"] = binNumber;
+        }        
+      }
+
+      for (var i = 0; i < numBins; i++) {
+        var firstIndex = parseInt(i * binSize);
+        var lastIndex = parseInt((i + 1) * binSize - 1);
+        console.log(firstIndex);
+        console.log(lastIndex);
+        legendLabels[i] = formatCurrency(allAveragePrices[firstIndex]) + " &ndash; " + formatCurrency(allAveragePrices[lastIndex]);
+      }
+
+      console.log(legendLabels);
+
+      console.log(mergedData);
+
+      return mergedData;
+
+    }
+
+    function mergeCountries(dataset) {
+    
+      var mergedData = {};
+
+      var countryGroups = _.groupBy(dataset, function(item) {
+        return item[1]; // The country code
+      });
+
+      console.log(countryGroups);
+
+      for (var countryCode in countryGroups) {
+        var mobilePackages = countryGroups[countryCode];
+        var sum = 0.0;
+        var denominator = 0;
+        for (var i = 0; i < mobilePackages.length; i++) {
+          adjustedPackageCost = mobilePackages[i][2];
+          sum += adjustedPackageCost;
+          if (adjustedPackageCost != null) {
+            denominator++;
+          }
+        }
+        var avg = sum / denominator;
+        mergedData[countryCode] = { "average": avg }
+
+      }
+
+      assignBin(mergedData);
+
+      return mergedData;
+    }
+
+    function createPopup(geo, data) {
+      var popup = '<div class="hoverinfo"><strong>';
+      popup += 'Avg $/GB (USD PPP) in ' + geo.properties.name + ': ';
+      
+      if (data != null && data.average != null) {
+        popup += formatPrice(data);
+      } else {
+        popup += 'N/A';
+      }
+     
+      popup += '</strong></div>';
+      return popup;
+    }
+
+    function formatPrice(data) {
+      if (isNaN(data.average)) {
+        return "N/A";
+      }
+      return formatCurrency(data.average);
+    }
+
+    function formatCurrency(number) {
+      return "$" + number.toFixed(2);      
+    }
+
+    /*function getFills() {
+      for (var i = 0; i < 10;)
+
+    }*/
+
+    function toObject(arr) {
+      var rv = {};
+      for (var i = 0; i < arr.length; ++i) {
+        rv[arr[i][1]] = { fillKey: getFillKey(arr[i][2]) };
+      }
+      return rv;
+    }
+
+    $(document).ready(function() {
+
+      var dataset = [];
+
+      d3.csv("bb_mobile_merge.csv", function(data) {
+        dataset = data.map(function(d) { return [ d["Country"], d["Country Code"], getCostPerGB(d["Cost per GB, excl conn (US$ PPP)"]) ]; });
+        //console.log(dataset);
+
+        var myData = mergeCountries(dataset);
+        
+
+
+        var map = new Datamap({
+          element: document.getElementById('subcontainer'),
+          fills: myFills,
+          data: myData,
+          geographyConfig: {
+            popupTemplate: function(geo, data) {
+              return createPopup(geo, data);
+            }
+          },
+          projection: 'mercator'
+        });
+      
+        map.legend();
+
+        var legendItems = $("div.datamaps-legend dl dt");
+
+        for (var i = 0; i < legendLabels.length; i++) {
+          $(legendItems[i]).html(legendLabels[i] + ": ");
+        }
+
+      });
+
+
+      
+      /*
+      dataset.forEach(function)
+      */
+
+    });
+
+  </script>
+
+</head>
+
+<body>
+
+    <h1>Mobile Broadband Prices ($/GB, USD PPP)</h1>
+    <div id="subcontainer" style="position: relative; width: 80%;"></div>
+
+
+<script>
+    
+
+
+</script>
+  
+</body>
+
+</html>
