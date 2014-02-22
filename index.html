@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bootstrap 101 Template</title>
+  <title>Mobile Broadband Prices</title>
 
   <!-- Bootstrap -->
   <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -78,14 +78,10 @@
       for (var i = 0; i < numBins; i++) {
         var firstIndex = parseInt(i * binSize);
         var lastIndex = parseInt((i + 1) * binSize - 1);
-        console.log(firstIndex);
-        console.log(lastIndex);
         legendLabels[i] = formatCurrency(allPrices[firstIndex]) + " &ndash; " + formatCurrency(allPrices[lastIndex]);
       }
 
-      console.log(legendLabels);
-
-      console.log(mergedData);
+      legendLabels[numBins] = "Missing data";
 
       return mergedData;
 
@@ -98,8 +94,6 @@
       var countryGroups = _.groupBy(dataset, function(item) {
         return item[1]; // The country code
       });
-
-      console.log(countryGroups);
 
       for (var countryCode in countryGroups) {
         var mobilePackages = countryGroups[countryCode];
@@ -146,30 +140,14 @@
       return "$" + number.toFixed(2);      
     }
 
-    /*function getFills() {
-      for (var i = 0; i < 10;)
-
-    }*/
-
-    function toObject(arr) {
-      var rv = {};
-      for (var i = 0; i < arr.length; ++i) {
-        rv[arr[i][1]] = { fillKey: getFillKey(arr[i][2]) };
-      }
-      return rv;
-    }
-
     $(document).ready(function() {
 
       var dataset = [];
 
       d3.csv("bb_mobile_merge.csv", function(data) {
         dataset = data.map(function(d) { return [ d["Country"], d["Country Code"], getCostPerGB(d["Cost per GB, excl conn (US$ PPP)"]) ]; });
-        //console.log(dataset);
 
         var myData = mergeCountries(dataset);
-        
-
 
         var map = new Datamap({
           element: document.getElementById('subcontainer'),
