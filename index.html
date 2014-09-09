@@ -28,7 +28,7 @@
   </style>
 
   <!-- Include all compiled plugins (below), or include individual files as needed -->
-  <script src="js/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
   <script src="js/d3.min.js"></script>
   <script src="js/topojson.js"></script>
@@ -38,23 +38,77 @@
 
   <script>
 
-    YEAR = 2014
-    CSV_LOCATION = "data/" + YEAR + "_cheapest.csv";
+    var legendLabels;
+    var dataset;
 
-    myFills = {
-      "0":  "#c7e9b4",
-      "1":  "#7fcbbb",
-      "2":  "#41b6c4",
-      "3":  "#2c7fb8",
-      "4":  "#253494",
-      MISS: "#ccc",
-      defaultFill: '#ccc'
-    };
+    YEAR = 2014;
 
-    legendLabels = [];
+    function getOtherYear() {
+      return (YEAR == 2014) ? 2013 : 2014;
+    }
+
+    function toggleYear() {
+      $("#subcontainer").empty();
+
+      YEAR = getOtherYear();
+      displayData(YEAR);
+      
+      showTextForYear();
+    }
+
+    function showTextForYear() {
+      $("#data_year").text("" + YEAR);
+      $("#toggleYear").text("Show " + getOtherYear() + " data");
+    }
+
+    function displayData(year) {
+      
+      // TODO: Check that year is well-formed 
+      var csv_location = "data/" + year + "_cheapest.csv";
+      var myFills = {
+        "0":  "#c7e9b4",
+        "1":  "#7fcbbb",
+        "2":  "#41b6c4",
+        "3":  "#2c7fb8",
+        "4":  "#253494",
+        MISS: "#ccc",
+        defaultFill: '#ccc'
+      };
+
+      // Init global vars (TODO: remove globals!)
+      legendLabels = [];
+      dataset = [];
+
+      d3.csv(csv_location, function(data) {
+        dataset = data.map(function(d) { return [ d["Country"], d["Country Code"], getCostPerGB(d["Cost per GB, excl conn (US$ PPP)"]) ]; });
+
+        var myData = mergeCountries(dataset);
+
+        var map = new Datamap({
+          element: document.getElementById('subcontainer'),
+          fills: myFills,
+          data: myData,
+          geographyConfig: {
+            popupTemplate: function(geo, data) {
+              return createPopup(geo, data);
+            }
+          },
+          projection: 'equirectangular'
+        });
+      
+        map.legend();
+
+        var legendItems = $("div.datamaps-legend dl dt");
+
+        for (var i = 0; i < legendLabels.length; i++) {
+          $(legendItems[i]).html(legendLabels[i] + ": ");
+        }
+
+      });
+    }
 
     function getCostPerGB(costPerGB) {
-      parsedCost = parseFloat(costPerGB.replace(',', ''));
+      var parsedCost = parseFloat(costPerGB.replace(',', ''));
       if (isNaN(parsedCost)) return null;
       return parsedCost;
     }
@@ -159,34 +213,9 @@
 
     $(document).ready(function() {
 
-      var dataset = [];
-
-      d3.csv(CSV_LOCATION, function(data) {
-        dataset = data.map(function(d) { return [ d["Country"], d["Country Code"], getCostPerGB(d["Cost per GB, excl conn (US$ PPP)"]) ]; });
-
-        var myData = mergeCountries(dataset);
-
-        var map = new Datamap({
-          element: document.getElementById('subcontainer'),
-          fills: myFills,
-          data: myData,
-          geographyConfig: {
-            popupTemplate: function(geo, data) {
-              return createPopup(geo, data);
-            }
-          },
-          projection: 'equirectangular'
-        });
-      
-        map.legend();
-
-        var legendItems = $("div.datamaps-legend dl dt");
-
-        for (var i = 0; i < legendLabels.length; i++) {
-          $(legendItems[i]).html(legendLabels[i] + ": ");
-        }
-
-      });
+      displayData(YEAR);
+      showTextForYear(YEAR);
+      $("#toggleYear").click(toggleYear);
 
     });
 
@@ -196,10 +225,11 @@
 
 <body>
 
-    <h1>Global Mobile Broadband Prices ($/GB, USD PPP, 2014 data)</h1>
+    <h1>Global Mobile Broadband Prices ($/GB, USD PPP, <span id="data_year">2014</span> data)</h1>
     <!-- 2013 data http://policybythenumbers.blogspot.co.uk/2013/05/international-broadband-pricing-study.html -->
     <div>
-      By Frank Hangler (<a href="http://twitter.com/hangler">@hangler</a>) and Gili Vidan (<a href="http://twitter.com/gvidan">@gvidan</a>) for <a href="http://hangler.net/blog/2014/02/23/oxford-open-data-day/">Oxford Open Data Hack Day</a>. More info and analysis (using 2013 data) is on the <a href="http://www.oii.ox.ac.uk/">Oxford Internet Institute</a> student blog <a href="http://blogs.oii.ox.ac.uk/roughconsensus/2014/02/could-you-afford-facebook-messenger-in-cameroon-a-global-map-of-mobile-broadband-prices/">here</a>. Data adapted from Google's <a href="http://policybythenumbers.blogspot.ca/2014/03/international-broadband-pricing-study.html">International Broadband Pricing Survey</a>. Visualization with <a href="http://d3js.org">D3</a> and <a href="http://datamaps.github.io/‎">DataMaps</a>. Code on <a href="http://github.com/hangler/mobile-broadband">GitHub</a>.
+      <p>By Frank Hangler (<a href="http://twitter.com/hangler">@hangler</a>) and Gili Vidan (<a href="http://twitter.com/gvidan">@gvidan</a>) for <a href="http://hangler.net/blog/2014/02/23/oxford-open-data-day/">Oxford Open Data Hack Day</a>. More info and analysis (using 2013 data) is on the <a href="http://www.oii.ox.ac.uk/">Oxford Internet Institute</a> student blog <a href="http://blogs.oii.ox.ac.uk/roughconsensus/2014/02/could-you-afford-facebook-messenger-in-cameroon-a-global-map-of-mobile-broadband-prices/">here</a>. Data adapted from Google's <a href="http://policybythenumbers.blogspot.ca/2014/03/international-broadband-pricing-study.html">International Broadband Pricing Survey</a>. Visualization with <a href="http://d3js.org">D3</a> and <a href="http://datamaps.github.io/‎">DataMaps</a>. Code on <a href="http://github.com/hangler/mobile-broadband">GitHub</a>.</p>
+      <button id="toggleYear"></button>
     </div>
     <div id="subcontainer"></div>
 
