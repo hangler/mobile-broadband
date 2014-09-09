@@ -21,6 +21,9 @@
 
   <script>
 
+    YEAR = 2014
+    CSV_LOCATION = "data/" + YEAR + "_cheapest.csv";
+
     myFills = {
       "0":  "#c7e9b4",
       "1":  "#7fcbbb",
@@ -44,8 +47,6 @@
     }
 
     function assignBin(mergedData) {
-
-      var mergedData;
 
       var allPrices = [];
 
@@ -143,7 +144,7 @@
 
       var dataset = [];
 
-      d3.csv("bb_mobile_merge.csv", function(data) {
+      d3.csv(CSV_LOCATION, function(data) {
         dataset = data.map(function(d) { return [ d["Country"], d["Country Code"], getCostPerGB(d["Cost per GB, excl conn (US$ PPP)"]) ]; });
 
         var myData = mergeCountries(dataset);
@@ -157,7 +158,7 @@
               return createPopup(geo, data);
             }
           },
-          projection: 'mercator'
+          projection: 'equirectangular'
         });
       
         map.legend();
@@ -182,14 +183,11 @@
     <div>
       By Frank Hangler (<a href="http://twitter.com/hangler">@hangler</a>) and Gili Vidan (<a href="http://twitter.com/gvidan">@gvidan</a>) for <a href="http://hangler.net/2014/02/22/oxford-open-data-day/">Oxford Open Data Hack Day</a>. Data adapted from Google's <a href="http://policybythenumbers.blogspot.co.uk/2013/05/international-broadband-pricing-study.html">International Broadband Pricing Survey</a>. Visualization with <a href="http://d3js.org">D3</a> and <a href="http://datamaps.github.io/‎">DataMaps</a>. Code on <a href="http://github.com/hangler/mobile-broadband">GitHub</a>.
     </div>
-    <div id="subcontainer" style="position: relative; width: 80%;"></div>
+    <div id="subcontainer" style="position: relative; width: 100%;"></div>
 
+    <table id="listing">
 
-<script>
-    
-
-
-</script>
+    </table>
   
 </body>
 
