@@ -10,6 +10,23 @@
   <!-- Bootstrap -->
   <link href="css/bootstrap.min.css" rel="stylesheet">
 
+  <!-- CSS -->
+  <style style="text/css">
+    html, body {
+      height: 100%;  
+    }
+
+    body {
+      padding: 0 10px; 
+    }
+
+    div#subcontainer {
+      position: relative;
+      height: 80%;
+    }
+
+  </style>
+
   <!-- Include all compiled plugins (below), or include individual files as needed -->
   <script src="js/jquery.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
@@ -179,11 +196,12 @@
 
 <body>
 
-    <h1>Global Mobile Broadband Prices ($/GB, USD PPP)</h1>
+    <h1>Global Mobile Broadband Prices ($/GB, USD PPP, 2014 data)</h1>
+    <!-- 2013 data http://policybythenumbers.blogspot.co.uk/2013/05/international-broadband-pricing-study.html -->
     <div>
-      By Frank Hangler (<a href="http://twitter.com/hangler">@hangler</a>) and Gili Vidan (<a href="http://twitter.com/gvidan">@gvidan</a>) for <a href="http://hangler.net/2014/02/22/oxford-open-data-day/">Oxford Open Data Hack Day</a>. Data adapted from Google's <a href="http://policybythenumbers.blogspot.co.uk/2013/05/international-broadband-pricing-study.html">International Broadband Pricing Survey</a>. Visualization with <a href="http://d3js.org">D3</a> and <a href="http://datamaps.github.io/‎">DataMaps</a>. Code on <a href="http://github.com/hangler/mobile-broadband">GitHub</a>.
+      By Frank Hangler (<a href="http://twitter.com/hangler">@hangler</a>) and Gili Vidan (<a href="http://twitter.com/gvidan">@gvidan</a>) for <a href="http://hangler.net/blog/2014/02/23/oxford-open-data-day/">Oxford Open Data Hack Day</a>. More info and analysis (using 2013 data) is on the <a href="http://www.oii.ox.ac.uk/">Oxford Internet Institute</a> student blog <a href="http://blogs.oii.ox.ac.uk/roughconsensus/2014/02/could-you-afford-facebook-messenger-in-cameroon-a-global-map-of-mobile-broadband-prices/">here</a>. Data adapted from Google's <a href="http://policybythenumbers.blogspot.ca/2014/03/international-broadband-pricing-study.html">International Broadband Pricing Survey</a>. Visualization with <a href="http://d3js.org">D3</a> and <a href="http://datamaps.github.io/‎">DataMaps</a>. Code on <a href="http://github.com/hangler/mobile-broadband">GitHub</a>.
     </div>
-    <div id="subcontainer" style="position: relative; width: 100%;"></div>
+    <div id="subcontainer"></div>
 
     <table id="listing">
 
