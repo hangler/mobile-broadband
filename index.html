@@ -13,17 +13,55 @@
   <!-- CSS -->
   <style style="text/css">
     html, body {
-      height: 100%;  
+      height: 100%;
     }
 
     body {
-      padding: 0 10px; 
+      padding: 0; 
     }
 
-    div#subcontainer {
-      position: relative;
-      height: 80%;
+    h1 {
+      margin-top: 0;
     }
+
+    div#top {
+      padding: 10px;
+    }
+
+    div#map {
+      position: relative;
+      float: left;
+      height: 80%;
+      width: 80%;
+    }
+
+    div#sidebar {
+      position: relative;
+      float: right;
+      background-color: #333;
+      color: #fff;
+      font-size: 12px;
+    }
+
+    table#price_listing {
+      background-color: #333;
+      color: #fff;
+      margin: 10px;
+    }
+
+    table#price_listing td, table#price_listing th {
+      padding: 2px 10px;
+    }
+
+    td.cost {
+      text-align: right;
+    }
+
+    .fill_0 { background-color: #c7e9b4; color: #333; }
+    .fill_1 { background-color: #7fcbbb; }
+    .fill_2 { background-color: #41b6c4; }
+    .fill_3 { background-color: #2c7fb8; }
+    .fill_4 { background-color: #253494; }
 
   </style>
 
@@ -48,7 +86,8 @@
     }
 
     function toggleYear() {
-      $("#subcontainer").empty();
+      $("#map").empty();
+      $("#price_listing tbody").empty();
 
       YEAR = getOtherYear();
       displayData(YEAR);
@@ -59,6 +98,37 @@
     function showTextForYear() {
       $("#data_year").text("" + YEAR);
       $("#toggleYear").text("Show " + getOtherYear() + " data");
+    }
+
+    function buildSidebar(data) {
+      
+      var dataArray = $.map(data, function(value, index) {
+        return [value];
+      });
+
+      console.log(dataArray);
+
+      dataArray.sort(function(a, b) {
+        if (a.countryName < b.countryName) return -1;
+        if (a.countryName > b.countryName) return 1;
+        return 0;
+      });
+
+      $.each(dataArray, function(index, value) {
+        d = value;
+        var row = [
+          "<tr class='fill_",
+          d.fillKey,
+          "'><td>",
+          d.countryName,
+          "</td><td class='cost'>",
+          formatCurrency(d.minPrice),
+          "</td></tr>"
+        ].join("");
+
+        $("#price_listing tbody").append(row);
+      });
+      
     }
 
     function displayData(year) {
@@ -86,8 +156,10 @@
 
         console.log(myData);
 
+        buildSidebar(myData);
+
         var map = new Datamap({
-          element: document.getElementById('subcontainer'),
+          element: document.getElementById('map'),
           fills: myFills,
           data: myData,
           geographyConfig: {
@@ -226,14 +298,23 @@
 </head>
 
 <body>
-
-    <h1>Global Mobile Broadband Prices ($/GB, USD PPP, <span id="data_year">2014</span> data)</h1>
     <!-- 2013 data http://policybythenumbers.blogspot.co.uk/2013/05/international-broadband-pricing-study.html -->
-    <div>
+    <div id="top">
+      <h1>Global Mobile Broadband Prices ($/GB, USD PPP, <span id="data_year">2014</span> data)</h1>
       <p>By Frank Hangler (<a href="http://twitter.com/hangler">@hangler</a>) and Gili Vidan (<a href="http://twitter.com/gvidan">@gvidan</a>) for <a href="http://hangler.net/blog/2014/02/23/oxford-open-data-day/">Oxford Open Data Hack Day</a>. More info and analysis (using 2013 data) is on the <a href="http://www.oii.ox.ac.uk/">Oxford Internet Institute</a> student blog <a href="http://blogs.oii.ox.ac.uk/roughconsensus/2014/02/could-you-afford-facebook-messenger-in-cameroon-a-global-map-of-mobile-broadband-prices/">here</a>. Data adapted from Google's <a href="http://policybythenumbers.blogspot.ca/2014/03/international-broadband-pricing-study.html">International Broadband Pricing Survey</a>. Visualization with <a href="http://d3js.org">D3</a> and <a href="http://datamaps.github.io/‎">DataMaps</a>. Code on <a href="http://github.com/hangler/mobile-broadband">GitHub</a>.</p>
       <button id="toggleYear"></button>
     </div>
-    <div id="subcontainer"></div>  
+    <div id="map"></div>  
+    <div id="sidebar">
+      <table id="price_listing">
+        <thead>
+          <th>Country</th>
+          <th>Cost/GB</th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
 </body>
 
 </html>
