@@ -5,6 +5,5 @@ Full description of the project (with analysis!) [on the Oxford Internet Institu
 Methodological notes
 --------------------
 
-* Exclude unlimited plans
-* 
+* Excludes unlimited plans
 
