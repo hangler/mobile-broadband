@@ -41,6 +41,10 @@
       background-color: #333;
       color: #fff;
       font-size: 12px;
+      height: 80%;
+      overflow-y: auto;
+      border-top: solid #333 10px;
+      border-bottom: solid #333 10px;
     }
 
     table#price_listing {
@@ -106,7 +110,7 @@
         return [value];
       });
 
-      console.log(dataArray);
+      //console.log(dataArray);
 
       dataArray.sort(function(a, b) {
         if (a.countryName < b.countryName) return -1;
@@ -154,7 +158,7 @@
 
         var myData = mergeCountries(dataset);
 
-        console.log(myData);
+        //console.log(myData);
 
         buildSidebar(myData);
 
